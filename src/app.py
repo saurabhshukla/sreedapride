@@ -4,6 +4,12 @@ Clean, modular Streamlit application for analyzing apartment water consumption.
 """
 
 import streamlit as st
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+sys.path.append(str(Path(__file__).parent))
+
 from data_processor import FlatDataProcessor, FlatAnalyzer
 from ui_components import FlatAnalysisUI
 

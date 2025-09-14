@@ -4,6 +4,12 @@
 Test script for the updated app.py
 """
 
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+sys.path.append(str(Path(__file__).parent.parent / "src"))
+
 from data_processor import FlatDataProcessor, FlatAnalyzer
 import pandas as pd
 
@@ -15,10 +21,11 @@ def test_updated_app():
     processor = FlatDataProcessor()
     analyzer = FlatAnalyzer()
 
-    # Test files
+    # Test files (now in data directory)
+    data_dir = Path(__file__).parent.parent / "data"
     files = [
-        "/Users/saurabhshukla/poc-workspace/sreedapride/BillingAll_Blocks_Jul-2025_10082025.xlsx",
-        "/Users/saurabhshukla/poc-workspace/sreedapride/BillingAll_Blocks_Aug-2025_04092025.xlsx"
+        str(data_dir / "BillingAll_Blocks_Jul-2025_10082025.xlsx"),
+        str(data_dir / "BillingAll_Blocks_Aug-2025_04092025.xlsx")
     ]
 
     # Load data

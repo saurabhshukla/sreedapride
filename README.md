@@ -22,19 +22,35 @@
 ## Quick Start
 
 ```bash
-# Run the app
-streamlit run app.py
+# Activate virtual environment
+source venv/bin/activate
+
+# Run the app locally
+streamlit run src/app.py
+
+# For Streamlit Cloud (uses streamlit_app.py automatically)
+streamlit run streamlit_app.py
 
 # Test everything
-python test_app.py
+python tests/test_app.py
 ```
 
 ## File Structure
 
 ```
-├── app.py              # Main application (UPDATED)
-├── data_processor.py   # Data processing logic
-├── ui_components.py    # UI components
-├── report_generator.py # Excel report generation
-└── test_app.py         # Test suite
+├── src/                    # Source code
+│   ├── app.py             # Main application
+│   ├── data_processor.py  # Data processing logic
+│   ├── ui_components.py   # UI components
+│   └── report_generator.py # Excel report generation
+├── data/                  # Excel data files
+│   ├── BillingAll_Blocks_Aug-2025_04092025.xlsx
+│   └── BillingAll_Blocks_Jul-2025_10082025.xlsx
+├── tests/                 # Test files
+│   └── test_app.py       # Test suite
+├── docs/                  # Documentation (future)
+├── venv/                  # Virtual environment
+├── streamlit_app.py      # Streamlit Cloud entry point
+├── requirements.txt       # Dependencies
+└── README.md             # This file
 ```

@@ -41,7 +41,7 @@ class FlatDataProcessor:
 
             return None
 
-        except Exception as e:
+        except Exception:
             return None
 
     def _get_processing_order(self, sheet_names: List[str]) -> List[str]:
@@ -80,7 +80,7 @@ class FlatDataProcessor:
             else:
                 return self._process_standard_sheet(file, sheet_name, raw)
 
-        except Exception as e:
+        except Exception:
             return None
 
     def _process_billing_sheet(self, file, sheet_name: str, raw: pd.DataFrame) -> Optional[pd.DataFrame]:
@@ -245,6 +245,8 @@ class FlatDataProcessor:
     def _process_standard_sheet(self, file, sheet_name: str, raw: pd.DataFrame) -> Optional[pd.DataFrame]:
         """Process standard sheets with apartment column."""
         # This would be implemented for other sheet types if needed
+        # Parameters kept for interface compatibility
+        _ = file, sheet_name, raw
         return None
 
 
