@@ -13,9 +13,9 @@ def load_multi_sheet_excel(file):
         xl_file = pd.ExcelFile(file)
         sheet_names = xl_file.sheet_names
         
-        st.write(f"**📋 Found {len(sheet_names)} sheets:**")
-        for i, sheet in enumerate(sheet_names):
-            st.write(f"  {i+1}. {sheet}")
+        # Store logs for debugging
+        processing_logs = []
+        processing_logs.append(f"📋 Found {len(sheet_names)} sheets: {', '.join(sheet_names)}")
         
         all_data = {}
         apartment_data = None
@@ -23,20 +23,19 @@ def load_multi_sheet_excel(file):
         # Try to find apartment data in each sheet
         for sheet_name in sheet_names:
             try:
-                st.write(f"\n**🔍 Analyzing sheet: '{sheet_name}'**")
+                processing_logs.append(f"\n🔍 Analyzing sheet: '{sheet_name}'")
                 
                 # Load sheet data
                 raw = pd.read_excel(file, sheet_name=sheet_name, header=None)
                 
                 if raw.empty:
-                    st.write(f"  ⚠️ Sheet '{sheet_name}' is empty")
+                    processing_logs.append(f"  ⚠️ Sheet '{sheet_name}' is empty")
                     continue
                 
-                # Show preview
-                st.write(f"  📊 Sheet size: {raw.shape[0]} rows × {raw.shape[1]} columns")
+                processing_logs.append(f"  📊 Sheet size: {raw.shape[0]} rows × {raw.shape[1]} columns")
                 
-                # Look for apartment-related data
-                apartment_keywords = ["apartment", "apartm", "flat", "unit", "block", "serial"]
+                # Look for apartment-related data (using Apartment as primary, not Block)
+                apartment_keywords = ["apartment", "apartm", "flat", "unit", "serial"]
                 billing_keywords = ["billed", "total", "consumption", "amount", "bill", "to be", "dues"]
                 
                 header_row = None
@@ -50,9 +49,12 @@ def load_multi_sheet_excel(file):
                     has_apartment = any(keyword in row_text for keyword in apartment_keywords)
                     has_billing = any(keyword in row_text for keyword in billing_keywords)
                     
+                    processing_logs.append(f"    Row {i+1}: apartment={has_apartment}, billing={has_billing}")
+                    
                     if has_apartment and has_billing:
                         header_row = i
-                        st.write(f"  ✅ Found apartment data at row {i + 1}")
+                        processing_logs.append(f"  ✅ Found apartment data at row {i + 1}")
+                        processing_logs.append(f"     Header content: {row.tolist()}")
                         break
                 
                 if header_row is not None:
@@ -61,13 +63,15 @@ def load_multi_sheet_excel(file):
                     
                     # Clean column names
                     df.columns = [str(c).strip().replace('\n', ' ').replace('\r', ' ') for c in df.columns]
+                    processing_logs.append(f"  📝 Available columns: {list(df.columns)}")
                     
-                    # Find apartment column
+                    # Find apartment column (prioritize 'Apartment' over 'Block')
                     flat_col = None
                     for col in df.columns:
                         col_lower = str(col).lower()
                         if any(keyword in col_lower for keyword in apartment_keywords):
                             flat_col = col
+                            processing_logs.append(f"  🏠 Found apartment column: '{flat_col}'")
                             break
                     
                     # Find billing column
@@ -76,6 +80,7 @@ def load_multi_sheet_excel(file):
                         col_lower = str(col).lower()
                         if any(keyword in col_lower for keyword in billing_keywords):
                             billed_col = col
+                            processing_logs.append(f"  💰 Found billing column: '{billed_col}'")
                             break
                     
                     # If no keyword match, find rightmost numeric column
@@ -91,17 +96,21 @@ def load_multi_sheet_excel(file):
                         
                         if numeric_cols:
                             billed_col = numeric_cols[-1]
+                            processing_logs.append(f"  💰 Using rightmost numeric column: '{billed_col}'")
                     
                     if flat_col and billed_col:
                         # Clean and process data
                         df_clean = df[[flat_col, billed_col]].copy()
                         df_clean.columns = ["Flat", "Consumption"]
                         
+                        processing_logs.append(f"  🧹 Raw data sample: {df_clean.head(3).to_dict('records')}")
+                        
                         # Clean data
                         df_clean["Flat"] = df_clean["Flat"].astype(str).str.strip()
                         df_clean["Consumption"] = pd.to_numeric(df_clean["Consumption"], errors='coerce').fillna(0)
                         
                         # Remove invalid rows
+                        before_count = len(df_clean)
                         df_clean = df_clean[
                             df_clean["Flat"].notna() & 
                             (df_clean["Flat"] != "") & 
@@ -109,36 +118,48 @@ def load_multi_sheet_excel(file):
                             (df_clean["Flat"] != "None") &
                             (~df_clean["Flat"].str.lower().str.contains("total|sum|grand", na=False))
                         ]
+                        after_count = len(df_clean)
                         
                         # Store data with sheet info
                         df_clean["Sheet"] = sheet_name
                         all_data[sheet_name] = df_clean
                         
-                        st.write(f"  ✅ Extracted {len(df_clean)} apartment records")
-                        st.write(f"  🏠 Apartment column: '{flat_col}'")
-                        st.write(f"  💰 Billing column: '{billed_col}'")
+                        processing_logs.append(f"  ✅ Extracted {after_count} apartment records (removed {before_count - after_count} invalid rows)")
+                        processing_logs.append(f"  📈 Consumption range: ₹{df_clean['Consumption'].min():.0f} - ₹{df_clean['Consumption'].max():.0f}")
                         
                         # Use the sheet with most data as primary
                         if apartment_data is None or len(df_clean) > len(apartment_data):
                             apartment_data = df_clean[["Flat", "Consumption"]].copy()
-                            st.write(f"  🎯 Using '{sheet_name}' as primary data source")
+                            processing_logs.append(f"  🎯 Using '{sheet_name}' as primary data source ({len(df_clean)} records)")
                     
                     else:
-                        st.write(f"  ⚠️ Could not find both apartment and billing columns in '{sheet_name}'")
-                        st.write(f"      Available columns: {list(df.columns)}")
+                        missing_cols = []
+                        if not flat_col:
+                            missing_cols.append("apartment")
+                        if not billed_col:
+                            missing_cols.append("billing")
+                        processing_logs.append(f"  ⚠️ Missing {', '.join(missing_cols)} columns in '{sheet_name}'")
+                        processing_logs.append(f"      Available columns: {list(df.columns)}")
                 
                 else:
-                    st.write(f"  ⚠️ No apartment data found in sheet '{sheet_name}'")
+                    processing_logs.append(f"  ⚠️ No apartment data found in sheet '{sheet_name}'")
             
             except Exception as e:
-                st.write(f"  ❌ Error processing sheet '{sheet_name}': {str(e)}")
+                processing_logs.append(f"  ❌ Error processing sheet '{sheet_name}': {str(e)}")
                 continue
+        
+        # Display processing logs in collapsible section
+        with st.expander("🔍 Processing Logs (Click to expand)"):
+            for log in processing_logs:
+                st.text(log)
         
         if apartment_data is not None:
             st.success(f"✅ Successfully loaded apartment data with {len(apartment_data)} records")
+            st.info(f"📊 Primary data source: {len([k for k, v in all_data.items() if len(v) == len(apartment_data)])} sheet(s) with {len(apartment_data)} records")
             return apartment_data, all_data
         else:
             st.error("❌ No apartment consumption data found in any sheet")
+            st.error("🔍 Looking for sheets with both 'Apartment' columns AND billing/consumption columns")
             return None, all_data
             
     except Exception as e:
@@ -366,14 +387,31 @@ if last_month_file and this_month_file:
                 if not high_consumers.empty:
                     high_consumers.round(2).to_excel(writer, sheet_name="High Consumers", index=False)
                 
-                # Summary sheet
-                summary_df = pd.DataFrame({
-                    "Metric": ["Total Apartments", "Active Apartments", "Zero Usage", "New Consumers", 
-                              "Major Increases", "Major Decreases", "Total Revenue Change", "Average Change"],
+                # Summary sheet with flat-level statistics
+                summary_data = {
+                    "Metric": ["Total Flats", "Active Flats", "Zero Usage", "New Consumers", 
+                              "Major Increases", "Major Decreases", "Total Revenue Change", "Average Change per Flat"],
                     "Value": [len(merged), active_flats, len(zero_consumption), len(new_consumers),
                              len(major_increases), len(major_decreases), f"₹{total_change:,.0f}", f"₹{avg_change:.0f}"]
-                })
-                summary_df.to_excel(writer, sheet_name="Summary", index=False)
+                }
+                
+                # Add block-wise summary
+                if len(merged) > 0:
+                    merged_with_blocks = merged.copy()
+                    merged_with_blocks["Block"] = merged_with_blocks["Flat"].str[:1]
+                    block_stats = merged_with_blocks.groupby("Block").agg({
+                        "Consumption_this": ["count", "sum", "mean"],
+                        "Change": "sum"
+                    }).round(0)
+                    block_stats.columns = ["Flats_Count", "Total_Consumption", "Avg_Consumption", "Total_Change"]
+                    block_stats = block_stats.reset_index()
+                    
+                    summary_df = pd.DataFrame(summary_data)
+                    summary_df.to_excel(writer, sheet_name="Summary", index=False)
+                    block_stats.to_excel(writer, sheet_name="Block Summary", index=False)
+                else:
+                    summary_df = pd.DataFrame(summary_data)
+                    summary_df.to_excel(writer, sheet_name="Summary", index=False)
 
             st.download_button(
                 label="📥 Download Comprehensive Analysis Report",
