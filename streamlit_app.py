@@ -29,8 +29,8 @@ if __name__ == "__main__":
     import streamlit as st
 
     st.set_page_config(
-        page_title="Flat Water Analysis",
-        page_icon="💧",
+        page_title="Apartment Water Billing System",
+        page_icon="🏢",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
