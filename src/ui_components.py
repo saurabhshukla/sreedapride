@@ -319,40 +319,6 @@ class FlatAnalysisUI:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-    def show_instructions(self):
-        """Display usage instructions."""
-        with st.expander("📖 How to Use This Flat-Level Analyzer"):
-            st.write("""
-            **This flat-level analyzer:**
-            - 🔍 **Scans all sheets** in your Excel files automatically
-            - 🏠 **Analyzes individual flats** (A101, B101, C101, etc.) separately
-            - 📊 **Finds apartment data** wherever it exists in the workbook
-            - 🎯 **Uses the sheet with most data** as the primary source
-            - 📈 **Provides flat-level analytics** with detailed insights per apartment
-            - 📋 **Generates comprehensive reports** focused on individual flats
-
-            **Perfect for apartment billing files with:**
-            - Multiple worksheets (Charts, Allocations, Reports, etc.)
-            - Individual flat consumption data
-            - Flat naming like A101, B101, C101, etc.
-            - Different data formats across sheets
-            - Various column naming conventions
-
-            **The analyzer will automatically:**
-            1. Scan all sheets for individual flat consumption data
-            2. Find apartment columns with flat numbers (A103, B201, etc.)
-            3. Clean and standardize flat-level data
-            4. Perform detailed flat-by-flat comparison analysis
-            5. Generate actionable insights for each individual apartment
-            6. Provide optional block summary for management overview
-
-            **Key Features:**
-            - Individual flat tracking and analysis
-            - Consumption changes per flat
-            - Zero usage flat identification
-            - High consumption flat alerts
-            - Flat-level executive summary with block overview
-            """)
 
     def show_error_message(self, message: str):
         """Display error message."""
@@ -362,9 +328,3 @@ class FlatAnalysisUI:
         """Display success message."""
         st.success(f"✅ {message}")
 
-    def show_troubleshooting(self):
-        """Display troubleshooting information."""
-        st.write("**Troubleshooting:**")
-        st.write("1. Ensure your Excel files contain apartment/flat data")
-        st.write("2. Check that billing amounts are in numeric format")
-        st.write("3. Verify that apartment identifiers are consistent between files")

@@ -97,11 +97,6 @@ def show_analysis_tab():
 
             else:
                 ui.show_error_message("Could not extract flat data from one or both files")
-                ui.show_troubleshooting()
 
         except Exception as e:
             ui.show_error_message(f"Error processing files: {str(e)}")
-            ui.show_troubleshooting()
-
-    # Show instructions
-    ui.show_instructions()

@@ -98,18 +98,18 @@ class StylingComponent:
             border-radius: 8px;
         }
 
-        /* Custom styling for buttons */
+        /* Custom styling for buttons - match selected tab blue */
         .stButton > button {
             border-radius: 8px;
             border: 1px solid #1f77b4;
-            background-color: #1f77b4;
-            color: white;
+            background-color: #1f77b4 !important;
+            color: white !important;
             font-weight: 500;
         }
 
         .stButton > button:hover {
-            background-color: #0066cc;
-            border-color: #0066cc;
+            background-color: #0066cc !important;
+            border-color: #0066cc !important;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(31, 119, 180, 0.3);
         }

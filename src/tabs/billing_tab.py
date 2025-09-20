@@ -145,8 +145,8 @@ def show_billing_tab():
                     except Exception as e:
                         st.error(f"❌ Error copying data: {str(e)}")
 
-    # Step 2: Enter Parameters & Generate Data
-    step2_status = "✅ Completed" if st.session_state.current_step > 2 else "⚙️ Enter Parameters & Generate"
+    # Step 2: Enter BWSSB and Tanker details
+    step2_status = "✅ Completed" if st.session_state.current_step > 2 else "⚙️ Enter BWSSB and Tanker details"
     step2_enabled = st.session_state.current_step >= 2
     with st.expander(f"**Step 2: {step2_status}**", expanded=(st.session_state.current_step == 2)):
         if step2_enabled:
@@ -362,72 +362,6 @@ def show_billing_tab():
         else:
             st.info("⏳ Complete Step 2 to unlock this section")
 
-    # Instructions Section
-    with st.expander("📖 How to Use This Billing Processor"):
-        st.write("""
-        **Complete Workflow Guide:**
-
-        **1. Prepare Files:**
-        - Download 'All Blocks DD-MM-YYYY.xlsx' from WeGot (Blockwise Report)
-        - Get the monthly billing template 'BillingAll_Blocks_Month-YYYY.xlsx'
-        - Get the Adda template file 'Adda_Template_DD-MM-YY.xlsx'
-
-        **2. Enter Parameters:**
-        - Set the billing month (e.g., Aug, Sep)
-        - Enter BESCOM water meter reading from manager
-        - Enter water tanker reading
-
-        **3. Process & Generate:**
-        - Click 'Process Billing Workflow' to execute all steps automatically
-        - System will integrate WeGot data with billing template
-        - Final allocation amounts will be calculated
-        - Both billing file and Adda template will be generated
-
-        **4. Download Files:**
-        - **📧 Updated Billing File**: Send this to residents via email
-        - **🎯 Adda Template**: Upload this to Adda platform
-        - **👁️ Data Preview**: View processed data for verification
-
-        **5. Distribution:**
-        - Email the updated billing file to all residents
-        - Login to Adda → Admin → Income Tracker → Bulk Posting
-        - Upload the Adda template file
-        - Verify totals and save
-
-        **Key Features:**
-        - ✅ Automated data integration from WeGot to billing template
-        - ✅ Updates original billing template with latest consumption data
-        - ✅ Generates separate Adda template for platform upload
-        - ✅ Creates email-ready billing file for resident distribution
-        - ✅ Summary statistics and verification
-        - ✅ Error handling and status tracking
-        """)
-
-    # Troubleshooting Section
-    with st.expander("🔧 Troubleshooting"):
-        st.write("""
-        **Common Issues:**
-
-        **File Upload Problems:**
-        - Ensure files are in .xlsx format
-        - Check that WeGot file contains blockwise data
-        - Verify billing template has all required sheets
-
-        **Processing Errors:**
-        - Verify month format (3-letter abbreviation: Jan, Feb, etc.)
-        - Ensure readings are positive numbers
-        - Check that uploaded files are not corrupted
-
-        **Template Generation Issues:**
-        - Confirm final allocation sheet has proper data structure
-        - Verify apartment codes are in correct format (A101, B202, etc.)
-        - Check that billing amounts are calculated correctly
-
-        **Data Verification:**
-        - Compare total amounts with manual calculations
-        - Verify apartment count matches expected number
-        - Cross-check with previous month's data for reasonableness
-        """)
 
     # Reset workflow button
     if st.session_state.workflow_completed:
