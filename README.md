@@ -22,8 +22,26 @@
 ## Quick Start
 
 ```bash
-# Activate virtual environment
+# Create (if needed) and activate a virtual environment
+# Create a venv (run once)
+# Use `python3` if `python` on your system refers to Python 2 or is missing
+python3 -m venv venv
+
+# Activate the venv
+# - macOS / Linux (bash, zsh)
 source venv/bin/activate
+# - fish shell
+# source venv/bin/activate.fish
+# - csh/tcsh
+# source venv/bin/activate.csh
+# - Windows PowerShell
+# .\venv\Scripts\Activate.ps1
+# - Windows Command Prompt
+# .\venv\Scripts\activate.bat
+
+# Install dependencies (run inside the activated venv)
+# Use `pip` (or `pip3` if your system requires it)
+pip install -r requirements.txt
 
 # Run the app locally
 streamlit run src/app.py
